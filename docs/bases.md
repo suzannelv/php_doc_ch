@@ -7,14 +7,17 @@ slug: /bases
 
 ## 關於文件
 
-預設檔（默认文件）為`index.php`。
-使用 Wamp 伺服器時，如果在 Web 伺服器根目錄（www 資料夾）建立新資料夾`mon-application-php`，我們可以透過（通过）造訪（訪问）`http://localhost/mon-application-php`來存取 （讀取）`index.ph`p 頁面 。
-如果在`mon-application-php`資料夾中建立另一個 test.php 頁面，那麼可以透過造訪`http://localhost/mon-application-php/test.php`來存取它。
+預設檔（默认文件）為 `index.php` 。
+
+使用 Wamp 伺服器時，如果在 Web 伺服器根目錄（www 資料夾）建立新資料夾 `mon-application-php` ，我們可以透過（通过）造訪（訪问）`http://localhost/mon-application-php` 來存取 （讀取）`index.php` 頁面 。
+
+如果在 `mon-application-php` 資料夾中建立另一個 test.php 頁面，那麼可以透過造訪 `http://localhost/mon-application-php/test.php` 來存取它。
 
 ## PHP 的開始和結束標籤
 
-要編寫 PHP 程式碼（代碼），需要使用 PHP 的開始標籤<?php
-如果在 HTML 中編寫 PHP 程式碼，則需要使用?>將 PHP 程式碼的部分正確分隔開。
+要編寫 PHP 程式碼（代碼），需要使用 PHP 的開始標籤 `<?php` 。
+
+如果在 HTML 中編寫 PHP 程式碼，則需要使用``?>` 將 PHP 程式碼的部分正確分隔開。
 範例：
 
 ```json
@@ -50,11 +53,11 @@ SPL 中的每個函數都有其相關文檔，可以在 PHP 官方網站上查�
 
 ### echo
 
-`echo`是 SPL 的函數，用於將內容新增至將傳送給客戶端的 HTML 結果中。
+`echo` 是 SPL 的函數，用於將內容新增至將傳送給客戶端的 HTML 結果中。
 
 ### var_dump
 
-`var_dump`允許我們以原始形式（可以稱之為轉存）在螢幕上查看變數的資訊（信息）。 這樣，我們就可以檢查其類型、值等資訊。
+`var_dump` 允許我們以原始形式（可以稱之為轉存）在螢幕上查看變數的資訊（信息）。 這樣，我們就可以檢查其類型、值等資訊。
 
 :::danger 生產環境中使用 VAR_DUMP
 絕對不要在生產環境中使用 var_dump，否則可能會在螢幕上顯示機密資訊。
@@ -89,7 +92,7 @@ $i = $i + 4; // $i vaut 4
 $i += 4; // équivalent à $i = $i + 4
 ```
 
-最後，如果要將數值遞增 1，可以使用 ++ 運算符：
+最後，如果要將數值遞增 1，可以使用 `++` 運算符：
 
 ```bash
 $i += 4; // équivalent à $i = $i + 4
@@ -103,7 +106,7 @@ $i = 0; var_dump($i++); // Affichera 0
 var_dump($i); // Affichera 1
 ```
 
-相反，如果將 ++ 運算符放在變量名稱之前，可以在表達式求值之前預先增加變數值：
+相反，如果將 `++` 運算符放在變量名稱之前，可以在表達式求值之前預先增加變數值：
 
 ```bash
 $i = 0;
@@ -126,8 +129,8 @@ var_dump(++$i); // Affichera 1
 
 ```bash
 /*
-Première ligne
-Seconde ligne
+第一行
+第二行
 */
 ```
 
@@ -140,13 +143,13 @@ PHP 中的常量由一個**不能被修改**的值定義。 可以使用 `const`
 const MA_CONSTANTE = 4;
 ```
 
--   常量不像變量那樣以 $ 作為前綴。
+-   常量不像變量那樣以 `$` 作為前綴。
 -   常量的名稱應以大寫字母書寫。
 
 ## 需要記住的基本要素
 
 -   變量以 `$` 字符開頭
--   指令以 分號 `;`結束
--   可以使用雙引號`"`或單引號`'`來分隔字串
+-   指令以 分號 `;` 結束
+-   可以使用雙引號 `"` 或單引號 `'` 來分隔字串
 -   使用雙引號時，可以直接在字串中插入變量，而不進行連接。
 -   PHP 中的字串連接運算符是點 `.`
