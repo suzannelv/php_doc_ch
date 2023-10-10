@@ -60,7 +60,7 @@ Zend Engine v4.2.1, Copyright (c) Zend Technologies
     with Xdebug v3.2.0, Copyright (c) 2002-2022, by Derick Rethans
 ```
 
-:::warning 注意
+:::caution 注意
 當然，上述輸出可能會根據 PHP 的版本和其他因素而有所不同，所以有略微不同的細節是正常的。
 :::
 

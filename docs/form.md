@@ -66,15 +66,15 @@ POST 方法必須在登入表單等敏感資訊（信息）的情況下使用。
 <form action="traitement.php" method="POST">...</form>
 ```
 
-![](https://www.nginx.cn/wp-content/uploads/2020/03/qrcode_for_gh_82cf87d482f0_258.jpg)
+![GET_POST差別](./assets/formulaire.png)
 
-:::warning 重要提示
-如果未提供`action`屬性，則表單的預設目標將是目前腳本。 如果未提供`method`屬性，則預設方法將是`GET`。
+:::caution 重要提示
+如果未提供 `action` 屬性，則表單的預設目標將是目前腳本。 如果未提供 `method` 屬性，則預設方法將是 `GET`。
 :::
 
 ## 表單字段
 
-在 HTML 表單中，我們使用`form`標籤將所有欄位包含起來。
+在 HTML 表單中，我們使用 `form` 標籤將所有欄位包含起來。
 
 為了能夠在處理表單的目標頁面中找到所有字段，每個字段都**必須**具有`name`屬性。
 
