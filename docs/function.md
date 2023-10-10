@@ -23,7 +23,7 @@ slug: function
 // 定義函數
 function maFonction(string $param1, string $param2 = 'defaultValue'): string
 {
-  // 執行指令
+// 執行指令
 }
 
 ```
@@ -40,7 +40,7 @@ function maFonction(string $param1, string $param2 = 'defaultValue'): string
 
 ### 參數
 
->     我的函數需要什麼才能運作？
+> 我的函數需要什麼才能運作？
 
 函數的參數定義了由呼叫函數的程式碼傳遞的輸入值。 這是函數所需要的一切。
 
@@ -51,7 +51,7 @@ function maFonction(string $param1, string $param2 = 'defaultValue'): string
 ```bash
 <?php
 // 定義函數
-function direBonjour(string $nom = "bel inconnu"): void // signature de la fonction
+function direBonjour(string $nom = "bel inconnu"): void // 函數簽名
 {
   echo "BONJOUR $nom !!!";
 }
@@ -65,7 +65,7 @@ direBonjour(); // 不含參數：預設值 = "bel inconnu"
 ```
 
 :::tip 可選參數
-可選參數具有預設值。 因此，它們應該放在函數參數的最後，以保持參數傳遞順序的一致性。
+可選參數具有預設值。 因此，它們應該放在函數參數的**最後**，以保持參數傳遞順序的一致性。
 
 自 PHP 8 開始，如果有許多可選參數，可以在呼叫時明確指定參數：
 
@@ -110,11 +110,11 @@ format('Hello', bold: true);
 
 ### 傳回值（返回值）
 
->     一旦我的函數執行完畢，是否需要向呼叫程式碼提供資訊？
+> 一旦我的函數執行完畢，是否需要向呼叫程式碼提供資訊？
 
 函數可以使用 return 語句向呼叫它的程式碼**傳回一個值**。
 
-:::warning 注意
+:::caution 注意
 使用 `return` 語句時，會導致函數的**退出**。
 :::
 
