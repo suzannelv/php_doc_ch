@@ -82,3 +82,293 @@ class Product
   public float $priceVatFree;
 }
 ```
+
+透過這個定義，我們剛剛創建了一個名為 Product 的結構化類型，它本身包含兩個屬性：`$name` 和 `$price`。
+
+在應用程式中建立新的結構化類型的另一個好處是我們可以賦予特定的功能的**能力**。
+
+這些能力以類**方法**的形式具現化。
+
+例如，我們可以說 `Product` 類別具有根據傳入的稅率，從其屬性 `$price` 返回產品的含稅價格的能力：
+
+```json
+class Product
+{
+    public string $name;
+    public float $priceVatFree;
+
+    /**
+     * 給出產品價格，包含給定的稅費
+     *
+     * @param float $taxRate 在 0 和 1 之間
+     * @返回浮動價格（包括給定稅費）
+     */
+    public function getFullPrice(float $taxRate): float
+    {
+        if ($taxRate >= 1) {
+            // 拋出錯誤（異常）
+        }
+
+        return $this->priceVatFree * (1 + $taxRate);
+    }
+
+```
+
+:::info 資訊
+在一個方法中，可以使用關鍵字$this 存取相同類別的屬性（請參閱有關類別實例的部分）。
+:::
+
+每個屬性或方法都具有可見性：`public`、`protected` 或 `private`。
+
+### 可見性
+
+可見性是用來向將要實例化某個類型物件的程式碼指明它可以或不可以存取什麼。
+
+在前面我們定義的 `Product` 類別中，這兩個屬性都是 public 的。
+
+這意味著我們可以使用以下語法直接從物件實例中存取它們：
+
+```bash
+$productName = $product->name;
+```
+
+事實上，為了遵守**封裝**原則，我們將把 `Product` 的屬性定義為私有屬性 `private`。
+
+### 封裝
+
+封裝是將類別的屬性設為 `private`，然後定義**存取**和**修改**這些屬性的方法，也就是所謂的**getter**和**setter**方法。
+
+此原則的主要優點是讓類別**保持對其屬性的控制**。 我們決定如何向外部程式碼提供類別的實例的屬性。
+
+:::note 注意
+
+另一個好處是可以將屬性設為唯讀(只讀)，因此不需要為該屬性聲明修改方法。 由於屬性是私有的，並且只有一個公共的存取方法，所以只能取得而無法修改它。
+
+:::
+
+以下是按照封裝原則重新編寫的 `Product` 類別：
+
+```bash
+class Product
+{
+    private string $name;
+    private float $priceVatFree;
+    private int $quantity;
+    private bool $discount;
+
+    // Getter
+    public function getName(): string
+    {
+        // 這裡我們可以決定始終以大寫字母返回產品名稱
+        return strtoupper($this->name);
+    }
+
+    // Setter
+    public function setPriceVatFree(float $price): void
+    {
+        // 這裡我們只在價格大於 0 時更新價格
+        if ($price >= 0) {
+            $this->priceVatFree = $price;
+        }
+    }
+
+    // Getter
+    public function getQuantity(): int
+    {
+        return $this->quantity;
+    }
+
+    // Setter
+    public function setQuantity(int $quantity): self
+    {
+        $this->quantity = $quantity;
+
+        return $this;
+    }
+
+    // Getter
+    public function getDiscount(): bool
+    {
+        return $this->discount;
+    }
+
+    // Setter
+    public function setDiscount(bool $discount): self
+    {
+        $this->discount = $discount;
+
+        return $this;
+    }
+}
+```
+
+:::note 流暢介面（Fluent Interface）
+
+在上述的 `setQuantity` 和 `setDiscount` 中，我們注意到回傳類型是 `self`，並且在 `setter` 的最後執行了 `return $this`。
+
+這種方法允許將類別方法的呼叫**連結**在一起，例如：
+
+```bash
+$product = new Product();
+$product
+  ->setQuantity(70)
+  ->setDiscount(true);
+
+// 而不是 :
+$product->setQuantity(70);
+$product->setDiscount(true);
+```
+
+這個原則被稱為**流暢介面**（**Fluent Interface**）。
+:::
+
+## 類別的實例化
+
+:::caution 注意
+當我們談到「類別的外部」時，我們指的是在類別的主體之外。
+:::
+
+一旦我們定義了產品的結構，在類別的外部，我們可以**實例化**和**操作**產品。 為此，我們只需聲明一個變量，並使用所需類型的 `new` 關鍵字：
+
+```json
+index.php
+
+require_once "classes/Product.php";
+$product = new Product();
+```
+
+一旦擁有了一個類別的實例，我們就可以存取它的**公共**方法：
+
+```json
+$product->setName("Téléviseur");
+echo $product->getName(); // 將顯示 "Téléviseur"
+
+$product->setPriceVatFree(800);
+echo $product->getFullPrice(0.2); // 將顯示 960
+```
+
+### 建構函數 (構造函數)
+
+在實例化一個類別時，我們可能希望在**實例化**時初始化某些值。 為此，可以定義一個類別的**建構函數**，這個方法會在類別實例化時自動執行：
+
+```json
+class Product
+{
+  // ...
+
+  public function __construct(string $nom = "Téléviseur")
+  {
+    $this->nom = $nom;
+  }
+}
+```
+
+要使用建構函數，可以像呼叫函數一樣使用帶有參數的方式來實例化對象，就像這樣：
+
+```json
+class Product
+// 我的產品將被稱為 "Téléphone"，但如果我在不傳遞任何參數的情況下實例化我的產品，它將自動被稱為 "Téléviseur"。
+$produit = new Product("Téléphone");
+```
+
+:::info 資訊
+
+在 PHP 中，一個類別的建構子被稱為一個**魔術方法**，這是因為它在特定的上下文中（這裡是創建類別的物件實例，使用 `new` 關鍵字）被自動呼叫。 魔術方法的名稱總是以兩個底線(下劃線)字元(字符) `__` 開頭。
+
+在 PHP 中還有其他可在類別中定義的魔術方法。
+:::
+
+### 類別實例
+
+必須記住類別的**定義**與類別的**實例**之間的區別。
+
+正如我們前面所看到的，類別的定義是首要的。 這是**設計類別的結構**、聲明屬性和方法的階段。
+
+完成類別的定義後，我就可以使用 `new` 關鍵字建立**物件**，其類型就是這個類別。
+
+:::note 注意
+物件是一個類別的**實例**。 你可以建立任意多類型的物件（當然是在機器記憶體(內存)允許的範圍內）。
+:::
+
+### 關鍵字 `$this`
+
+讓我們回顧一下類別的定義。
+
+在類別的主體中，尤其是在其方法中，可以使用關鍵字 `$this`。 這個關鍵字用來引用**呼叫方法的實例**。
+
+舉個例子，如果我重新分析 Product 類，或至少其中的一部分：
+
+```json
+
+<?php
+class Product
+{
+  private string $name;
+  //...
+
+  public function getName(): ?string //" ? "表示回傳值可能為 "空(null)"。
+  {
+    return strtoupper($this->name);
+  }
+
+  public function setName(string $name): void
+  {
+    $this->name = $name;
+  }
+
+  //...
+}
+
+// 這裡在類別的主體之外，因此可以建立 `Product` 的實例。
+$tele = new Product();
+
+// 當呼叫 setName 時，在 setName 的 $this 指的是我們的 $tele
+// 因此，這是在呼叫方法的實例
+$tele->setName("Super écran plat");
+
+$macbook = new Product();
+
+// 同樣，setName 不再在 $tele 上執行，而是在 $macbook 上執行。
+// 我們有 2 個不同的實例，每個實例都有自己的屬性值
+$macbook->setNom("Apple Macbook");
+
+```
+
+## 類別常量
+
+**常量**可以在類別中定義。 這對於集中那些不想在類別中修改的數據非常有用，這樣就可以在類別的各種方法中使用這些數據，如果常數是公共的，也可以在類別外使用。
+
+```json
+
+<?php
+class Email
+{
+  private string $email;
+
+  //...
+
+  public function getDomain(): string
+  {
+    $emailParts = explode('@', $this->email);
+    return $emailParts[1];
+  }
+}
+
+class SpamChecker
+{
+  private const SPAM_DOMAINS = ['youhou.com', 'mailinator.com', 'free.fr', 'hello.net'];
+
+  public function isSpam(Email $email): bool
+  {
+    return array_search($email->getDomain(), self::SPAM_DOMAINS) !== false;
+  }
+}
+```
+
+:::caution 注意
+
+存取類別常數的方法與存取屬性的方法不同。 若要存取屬性，我們將使用箭頭 `->`，前面加上 `$this` 關鍵字。
+
+要存取常數，我們在類別內部使用 `self::MA_CONSTANT`，在類別外部使用 `ClassName::MA_CONSTANT`。這是存取類別的**靜態**成員的語法。
+
+:::
