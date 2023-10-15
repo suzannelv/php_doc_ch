@@ -7,7 +7,7 @@ const darkCodeTheme = require("prism-react-renderer/themes/dracula");
 /** @type {import('@docusaurus/types').Config} */
 const config = {
     title: "PHP 課程 (中文版)",
-    tagline: "Dinosaurs are cool",
+    tagline: "PHP Grinder",
     favicon: "img/favicon.ico",
 
     // Set the production url of your site here
@@ -40,10 +40,6 @@ const config = {
                 docs: {
                     routeBasePath: "/",
                     sidebarPath: require.resolve("./sidebars.js"),
-                    // Please change this to your repo.
-                    // Remove this to remove the "edit this page" links.
-                    editUrl:
-                        "https://github.com/facebook/docusaurus/tree/main/packages/create-docusaurus/templates/shared/",
                 },
                 blog: false,
                 // blog: {
@@ -80,7 +76,7 @@ const config = {
                     // },
                     // { to: "/blog", label: "Blog", position: "left" },
                     {
-                        href: "https://github.com/facebook/docusaurus",
+                        href: "https://github.com/suzannelv/php_doc_ch",
                         label: "GitHub",
                         position: "right",
                     },
