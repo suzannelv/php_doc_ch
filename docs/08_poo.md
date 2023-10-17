@@ -372,3 +372,123 @@ class SpamChecker
 要存取常數，我們在類別內部使用 `self::MA_CONSTANT`，在類別外部使用 `ClassName::MA_CONSTANT`。這是存取類別的**靜態**成員的語法。
 
 :::
+
+## 靜態成員
+
+正如我們剛剛提到的常數一樣，訪問靜態成員的語法是不同的。 原因是常數是類別中的**靜態**成員。
+
+:::tip 靜態/非靜態
+
+要記住**靜態成員**和**非靜態成員**之間的主要差異是，**靜態成員**與**類別的實例無關**，而是**與類別本身相關聯**。
+
+這也意味著要訪問靜態成員，我們根本不需要建立類別的實例。
+
+因此，在靜態方法中，我們只能訪問靜態的東西（因為我們與任何實例都沒有關聯）。
+
+:::
+
+靜態成員可以是屬性、方法或常數（常數預設為靜態的）。
+
+因此，我們可以使用關鍵字 `static` 將屬性或方法變成靜態的：
+
+```bash
+
+class Utils
+{
+  public static function upper(string $input): string
+  {
+    return strtoupper($input);
+  }
+}
+
+echo Utils::upper("test"); // TEST
+
+```
+
+:::note 注意
+
+靜態成員並不常被使用。 實際上，在我們的類別中，我們最常使用的是聲明常數，無論是公共的還是私有的，它們預設（默認）是靜態的。
+
+對於方法，偶爾我們會聲明靜態方法。 如上所示的 Utils 類，主要涉及到非常通用的方法，這些方法不能專門與應用程式的某個特定方面或概念相關聯。
+
+否則，在"非通用"類別中，靜態方法可以用來初始化某些內容並傳回類別的實例，就像建構函數一樣，但不需要使用 new 關鍵字[範例](https://github.com/symfony/http-foundation/blob/6.3/Request.php#L300)。
+
+:::
+
+## 異常
+
+異常用於在物件導向程式設計中進行**錯誤處理**。
+
+事實上，當我們設計一個功能時，我們會考慮正常的執行流程。 但是，不希望發生的情況可能會出現。 因此，我們可以將它們視為與預期行為不符的**異常**情況。
+
+因此，我們可以調用程式碼**拋出**異常並**捕獲**它。
+
+錯誤處理的關鍵時刻：當我們捕捉異常時，可以採取適當的措施來處理異常的發生。
+
+### 範例
+
+在一個名為 `Email` 的類別中，我在建構時提供要儲存為屬性的電子郵件地址，如果傳遞的值不正確（如電子郵件格式錯誤），我希望阻止類別的實例化。
+
+這個行為有雙重用途：首先，它讓我們在物件建構的早期階段儘早偵測到錯誤。 其次，透過禁止實例化，我們也防止了呼叫該建構函式的程式碼取得不穩定狀態的類別實例（避免了建立不正確電子郵件，不健康 `Email` 實例）。
+
+因此：
+
+```bash
+class Email
+{
+  private string $email;
+
+  /**
+   * 建立一個新的電子郵件實例
+   *
+   * @param string $email 要儲存在實例中的值
+   * @throws InvalidArgumentException 如果電子郵件格式無效，拋出InvalidArgumentException
+   */
+  public function __construct(string $email)
+  {
+    $this->email = $email;
+
+    if (!$this->isValid()) {
+      throw new InvalidArgumentException("電子郵件地址的格式無效");
+    }
+  }
+
+  public function isValid(): bool
+  {
+    return filter_var($this->email, FILTER_VALIDATE_EMAIL) !== false;
+  }
+
+  //...
+}
+```
+
+在需要 `Email` 類別的實例並且可能引發異常的檔案中，可以使用以下方式 `try...catch` 區塊來處理異常：
+
+```bash
+try {
+  $email = new Email($_POST['email']);
+} catch (InvalidArgumentException $ex) {
+  echo $ex->getMessage();
+  exit;
+}
+```
+
+這樣可以避免我們做類似以下的事：
+
+```bash
+$email = new Email($_POST['email']);
+// 此時，我們擁有一個無效狀態的實例。
+// 因此，我們必須在呼叫isValid之前考慮其他操作
+// quoi que ce soit d'autre.
+// 這就是問題所在：我們很可能會忘記呼叫此方法來驗證對象的缺陷，
+// 從而導致無效的對象，這將導致不可控制的錯誤。
+
+if (!$email->isValid()) {
+  echo "電子郵件地址的格式無效";
+  exit;
+}
+```
+
+:::tip 提示
+異常允許更快速、更清晰地檢測到不想要的行為。
+:::
