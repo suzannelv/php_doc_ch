@@ -492,3 +492,203 @@ if (!$email->isValid()) {
 :::tip 提示
 異常允許更快速、更清晰地檢測到不想要的行為。
 :::
+
+## 繼承
+
+繼承是一種用於定義多個類型共享部分屬性但不共享所有屬性的方式
+。
+在這種情況下，將所有這些屬性放在一個類別中將導致該類別的每個實例都具有不必要的屬性。 否則，我們將不得不在多個不同的類別中重複相同的屬性。 因此，我們要盡量避免浪費空間或冗餘。
+
+為了解決上面的情況，我們可以定義一個類別**繼承**自另一個類別。
+
+例如一個產品：如果我有矩形產品，它們具有高度和寬度，以及圓形產品，它們具有直徑，那麼當我有一個矩形產品時，直徑對我來說其實是無用的，反之亦然。
+
+讓我們定義一個名為 `ProductRect` 的新類，它具有寬度和高度屬性，並繼承自 `Product` 類（請注意，`Product` 類已經具有各種屬性，例如名稱或價格）。
+
+```bash
+class ProductRect extends Product
+{
+  private $width;
+  private $height;
+
+  // 為了做簡化，此處未做寬度和高度的setter和getter
+}
+```
+
+我現在可以實例化一個 `ProductRect` 類型物件：
+
+```json
+$myRectProduct = new ProductRect();
+```
+
+:::info 資訊
+
+在關於[屬性和方法](#屬性和方法)的部分，我們看到一個類別的成員可以透過動詞 **"有"**來識別（例如一個產品有一個名字等等）。
+
+然而，用來識別繼承關係的動詞是 **"是"**：一個矩形產品是一個產品。
+:::
+
+我的矩形產品將自動擁有名稱 "Téléviseur"，因為它**繼承**了 `Product` 類別的建構子。
+
+我也可以在 `ProductRect` 類別中定義一個建構函數，用來**重載**或替代父類別的建構子。
+
+因此，為了不失去在父類別 `Product` 中執行的產品名稱初始化，我可以從子類別建構函式中**呼叫父類別建構函式**。
+
+```bash
+class ProductRect extends Product
+{
+  private $width;
+  private $height;
+
+  public function __construct(int $w, int $h)
+  {
+    parent::__construct(); // 呼叫父類別建構函式
+    $this->width = $w;
+    $this->height = $h;
+  }
+}
+```
+
+:::warning 多重繼承
+一個類別只能從一個類別繼承。 **多重繼承是不可能的**。
+:::
+
+### 可見性和繼承
+
+我們已經討論過屬性或方法的受保護 `protected` 可見性。 可見性的優點在於你想把什麼暴露在類別之外。 類別的外部指的是：將實例化該類別物件的程式碼，以及從該類別繼承的子類別。
+
+在我們的範例中，`ProductRect` 類別不能直接訪問 `$name` 和 `$price` 屬性，因為它們被定義為私有屬性。
+
+如果我們想要從 `ProductRect` 子類別存取 `Product` 中定義的這些屬性，就必須將它們設為受保護``protected` 屬性：
+
+```bash
+class Product
+{
+  protected $name;
+  protected $price;
+  //...
+}
+
+//...
+
+class ProductRect extends Product
+{
+  //...
+
+  public function displayInfos()
+  {
+    // 這裡我們可以使用 $this->name 因為 $name 在 Product 中受到保護
+    echo $this->name . ", rectangulaire : L" . $this->width . ", H" . $this->hauteur;
+  }
+```
+
+總結一下屬性、方法或常數性：
+
+-   `public`：可以被任何地方的任何代碼訪問。
+-   `protected`：不能被實例化這個類別的程式碼訪問，但可以被繼承這個類別的其他類別訪問。
+-   `private`：無法被外部的任何程式碼存取，包括子類別。 只能在目前類別內部進行操作。
+
+## 抽象類別
+
+透過在 `class` 關鍵字前面使用 `abstract` 關鍵字，可以建立一個**抽象**類別。
+
+抽象類別有何意義？
+
+-   抽象類別無法被實例化。 因此，如果我們想定義一個**基礎**的類別結構，並且該結構隨後將被繼承，但我們不想操作類別的實例，那麼我們可以將它宣告為抽象類別。 在我們的範例中，我們定義了一個抽象類別
+    `Product`，作為一個抽象結構，它具有一些通用屬性，這些屬性將在 `Product` 的子類別中繼承。 但我們希望在應用程式程式碼中實際上操作的是 `ProductRect` 或 `ProductCirc` 等具體產品實例。
+
+在抽象類別中，可以定義一個或多個**抽象方法**。 抽象方法沒有**方法體**（沒有實際實作），只有方法**簽名**。 因此，定義抽象方法**要求子類別提供該方法的實現**。
+
+```bash
+abstract class Product
+{
+  protected $name;
+  // ...
+
+  // 我們定義了一個所有子類別都必須執行的方法
+  public abstract function getSurface(): float;
+}
+
+class ProductRect extends Product
+{
+  private $width;
+  private $height;
+  //...
+
+  // 我們提供了一個 getSurface 方法的實現
+  public function getSurface(): float
+  {
+    return $this->width * $this->height;
+  }
+}
+
+```
+
+在類別 ProductCirc 中，我們也**需要**提供 getSurface 方法的實現，這個方法是特定於圓形產品的。
+
+### 介面(接口)
+
+介面是 PHP 中的另一種抽象類型。
+
+與抽象類別的共同之處在於，介面的作用是提供一系列方法簽名，而沒有方法體。 然而，在介面中不會有屬性或關鍵字 abstract。 介面**本質上**就是抽象的，因此永遠不會使用 new 關鍵字來明確實例化一個介面。
+
+:::tip 抽象類別/介面
+
+介面和抽象類別一樣:
+
+-   不能被實例化
+-   定義方法的簽名
+
+另一方面，在抽象類別中，可以定義具體方法，為實作提供基礎。而在介面中，不允許這樣做。
+
+:::
+
+隨後，如果我們想使用一個接口，那麼在類別的層次上，我們將使用關鍵字 `implements` 來表示我們正在**實現(執行)**這個接口（與繼承抽象類別時使用 `extends` 關鍵字不同）。 這意味著類別聲明它為介面定義的所有方法提供了**實現**。
+
+:::info 實現契約
+一般來說，一個介面可以被視為**實現契約**的方式：
+
+一個介面是實現契約，任何類別在聲明實作介面後都必須遵守這個契約。 這意味著該類別必須實作介面中定義的所有方法。
+:::
+
+例如，我們定義了一個名為 `IFormattable` 的接口，要求希望實現該接口的類別提供自己的格式化（自己的顯示方式）。
+
+```bash
+
+interface IFormattable
+{
+  public function format(): string;
+}
+
+class Email implements IFormattable
+{
+  /**
+   * 在這裡，對於一封電子郵件，我們可以決定 "格式 "的實現方式是讓 @ 消失，以避免暴露的電子郵件
+   */
+  public function format(): string
+  {
+    return str_replace("@", "_", $this->email);
+  }
+}
+
+class User implements IFormattable
+{
+  private string $name;
+  private string $firstname;
+
+  public function getFullName(): string
+  {
+    //...
+  }
+
+  /**
+   * 對於用戶，其格式可以是用戶的全名。
+   * 電子郵件類別和使用者類別沒有共同的父類，但如果在應用程式中的某個時刻，我們需要可以格式化的類別實例，那麼我們可以使用電子郵件或使用者類別的實例,
+   * 我們需要可以格式化的類別的實例，那麼我們可以使用電子郵件或使用者的實例。
+   */
+  public function format(): string
+  {
+    return $this->getFullName();
+  }
+}
+```
