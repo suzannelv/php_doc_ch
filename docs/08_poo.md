@@ -692,3 +692,86 @@ class User implements IFormattable
   }
 }
 ```
+
+## 多態性
+
+如果我們不理解抽象概念，就很難理解多態性。
+
+事實上，多態行為只是簡單地涉及使用某種方法，而這種方法從父類別的角度來看通常是抽象的方法，但在子類別中來執行它。
+
+上面的句子可能不夠清晰，讓我們來舉一個例子（假設已經實現了 getter 和 setter 以節省一些空間）：
+
+```json
+<?php
+// 一般情況下，應用程式中的使用者。
+abstract class User
+{
+  protected $username;
+
+  public function __construct(string $username)
+  {
+    $this->username = $username;
+  }
+
+  // 由於我將方法命名為“display”，因此我將在其中進行echo操作
+  abstract public function display(): void;
+}
+
+// 員工是用戶
+class Employee extends User
+{
+  private string $empNumber;
+
+  public function display(): void
+  {
+    echo "Employé " . $this->username . " : N° " . $this->empNumber;
+  }
+}
+
+// 客戶也是用戶
+class Client extends User
+{
+  private string $clientNumber;
+
+  public function display(): void
+  {
+    echo "Client " . $this->username . " : N° " . $this->clientNumber;
+  }
+}
+```
+
+這段程式碼有多態行為嗎？ 並沒有，目前我們只**定義**了類別。
+
+不過，我們正在為多態行為準備我們的類別層次結構，以便與實例一起使用。 讓我們在類別之外編寫一些程式碼，這些程式碼可以在我們的層次結構中實例化/處理物件：
+
+```json
+/**
+ * @param User[] $users
+ */
+function displayUsers(array $users): void
+{
+  foreach ($users as $user) {
+    $user->display();
+    echo "<br />";
+  }
+}
+
+$users = [
+  new Client("Edna Aguilar"),
+  new Employee("Ralph Cannon"),
+  new Employee("Beatrice Glover"),
+  new Client("Lela Hayes"),
+  new Client("Justin Mack"),
+  new Employee("Jack Weaver")
+];
+
+displayUsers($users);
+```
+
+回顧前面的這句話：
+
+> 多態行為只是簡單地涉及使用某種方法，而這種方法從父類別的角度來看通常是抽象的方法，但在子類別中來執行它。
+
+這正是函數 `displayUsers` 所做的：它將所有使用者視為 `Users` ，因此使用 `display` 方法，而不考慮它是由 `Employee` 還是 `Client` 執行的。 它只知道它在參數數組中期望一個 `User` 物件（父類別），因此任何特定的實例都將具有 `display` 的實作。 這種行為是多態的，因為它的執行可以根據不同的實例而改變。
+
+無論如何，從 `displayUsers` 的角度來看，它的優點是它不需要知道 `Employee` 和 `Client` 如何實作 `display` 。 這個原則對於介面也是一樣的。
