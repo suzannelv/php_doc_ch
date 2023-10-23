@@ -82,7 +82,7 @@ try {
 
 :::caution 注意
 
-文件告訴我們，如果連接失敗，該類別的建構函數可以引發異常。 因此，最好將物件的建立放在一個 `try/catch` 區塊中，以實現最小的錯誤處理。
+文件告訴我們，如果連接失敗，該類別的建構函數可以引發異常。 因此，最好將物件的建立放在一個 `try/catch` 區塊中，以實現錯誤處理最小化。
 
 :::
 
@@ -101,7 +101,7 @@ $stmt = $pdo->query($query);
 
 隨後，我們需要遍歷這個語句的記錄。 讓我們開始取得第一條記錄：
 
-```json
+```bash
 // row = 行（包含一條記錄的資料）
 // fetch 意味著"讀取"/"獲取"
 $row = $stmt->fetch();
@@ -110,7 +110,7 @@ var_dump($row);
 
 如果我們想逐一取得所有記錄，使用 `fetch` 方法並對其使用循環：
 
-```json
+```bash
 // while循環將在結果的最後一行後自動停止，因為fetch方法將傳回false。。
 while ($row = $stmt->fetch()) {
   var_dump($row);
@@ -119,6 +119,167 @@ while ($row = $stmt->fetch()) {
 
 最後，如果我們想要將所有記錄直接儲存在一個變數中，我們也可以使用 `fetchAll` 方法：
 
-```json
+```bash
 $results = $stmt->fetchAll();
 ```
+
+## 錯誤/配置
+
+在建構中，我們已經看到 PDO 的建構函數可能引發 `PDOException`。
+
+除了在建構時的錯誤外，我們可以配置 PDO 將其錯誤處理模式設為"異常"模式。
+
+即在實例化物件後完成：
+
+```bash
+try {
+  $pdo = new PDO($dsn, $user, $password);
++  $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+  echo $e->getMessage();
+  exit;
+}
+```
+
+或在物件實例化時，直接以選項的形式出現：
+
+```bash
++$options = [
++  PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
++];
+
+try {
++  $pdo = new PDO($dsn, $user, $password, $options);
+} catch (PDOException $e) {
+  echo $e->getMessage();
+  exit;
+}
+```
+
+## 讀取模式
+
+### 陣列
+
+預設情況下，`fetch` 或 `fetchAll` 方法會傳回一個混合了數值索引和結果列名稱的鍵的陣列。
+
+如果我們想要只取得一個關聯數組，我們可以透過 PDO 的方法執行：
+
+```bash
+while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+  var_dump($row);
+}
+```
+
+這樣，我們可以訪問每個 `$row` 的列，透過列名來進行訪問，就像操作關聯數組一樣（例如 `$row['nom']` ）。
+
+### 對象
+
+我們还可以使用 `fetchObject` 方法要求 PDO 将结果转换为对象：
+
+```bash
+while ($row = $stmt->fetchObject('People')) {
+  require 'people-card.php';
+}
+```
+
+在這種情況下，PDO 會自動根據列名將對應的屬性賦值給具有相同名稱的類別。
+
+然後，它會呼叫類別的建構函數。
+
+:::note 注意
+
+與異常格式中的錯誤模式一樣，預設讀取模式可在建立 PDO 實例時進行設定：
+
+```bash
+$options = [
+  PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
++  PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+];
+
+//...new PDO(..., $options); ...
+```
+
+:::
+
+## 預處理查詢
+
+使用 PDO 實例的 `query` 方法對於簡單或靜態查詢可能很有用。 但對於動態查詢，特別是那些需要使用**來自使用者的數據**（主要是 GET/POST 參數）的查詢，我們應該使用**預處理查詢**，而不是手動建立表示查詢的字串。
+
+當我們在 PDO 實例上使用 `query` 方法時，我們直接傳遞查詢來執行。 所有這些都只需一步即可完成。
+
+但對於預處理查詢，流程分為兩步驟：
+
+-   我們使用一個或多個**查詢參數**來準備一個 `Statement`（語句）。
+-   我們執行該 `Statement` 並提供參數的值，以取代查詢中的參數。
+
+:::danger SQL 注入
+
+預處理查詢可用於防止 SQL 注入，而這種類型的攻擊在 URL 或表單中非常容易實施。
+
+如果我們看一下下面沒有使用預處理查詢的程式碼 ：
+
+```bash
+$stmt = $pdo->query("SELECT * FROM users WHERE id=" . $_GET['id']);
+```
+
+所以問題是：我們要如何控制 `$_GET` 陣列中的內容？ 而預處理查詢不會有這個問題，因為提供給參數的值會經過過濾。
+
+:::
+
+### 命名參數
+
+我們可以使用**命名參數**來準備一個查詢。 在這種情況下，我們需要在參數名稱前加上冒號 `：`
+
+```bash
+// 1 - 使用命名參數「id」來準備查詢
+$stmt = $pdo->prepare("SELECT * FROM users WHERE id=:id");
+// 2 - 提供參數值來執行查詢
+$stmt->execute([
+  'id' => $_GET['id']
+]);
+```
+
+### 匿名參數
+
+我們也可以使用匿名參數來準備查詢，使用問號（`?`）作為**佔位符**。 在這種情況下，參數沒有明確的名稱，因此在執行查詢時必須確保按照參數聲明的順序提供值。
+
+```bash
+// 1 - 準備查詢
+$stmt = $pdo->prepare("SELECT * FROM users WHERE id >= ? AND username LIKE ?");
+// 2 - 提供參數值來執行查詢
+$stmt->execute([
+  $_GET['id'],
+  '%' . $_GET['username'] . '%'
+]);
+```
+
+:::note 注意
+在最後一個例子中，對於 `username` ，我們沒有為字串提供引號（無論是在準備階段還是在執行階段）。 PDO 會自動處理，因此不需要為字串加上引號。
+:::
+
+### 參數綁定和類型
+
+我們也可以使用 `PDOStatement` 的專用方法來為預處理查詢的不同參數指派值，並在執行之前更精確地指定參數的類型。 `bindValue`方法：
+
+```bash
+// 1 - 準備查詢
+$stmt = $pdo->prepare("SELECT * FROM users WHERE id >= ? AND username LIKE ?");
+// 1 bis - 我將不同的參數綁定到不同的值。
+$stmt->bindValue(1, $_GET['id'], PDO::PARAM_INT);
+$stmt->bindValue(2, '%' . $_GET['username'] . '%', PDO::PARAM_STR);
+// 2 - 執行查詢
+$stmt->execute();
+```
+注意，在使用佔位符（即問號，也就是匿名參數）的情況下，我們指定參數的**位置**而不是名稱。
+
+如果使用命名參數，我們可以使用參數的名稱而不是位置。
+
+:::note 注意
+
+還有另一種 ``PDOStatement`` 的方法叫做 ``bindParam`` 。
+
+它的行為有所不同，因為它**將PHP變量綁定到查詢參數**。 在這種情況下，PHP變量與查詢參數透過引用綁定在一起，甚至可以被修改。
+
+因此，在使用這個方法時要小心潛在的副作用。 通常情況下，為了避免過度耦合程式碼和查詢，我們會更常使用 ``bindValue`` 方法。
+
+:::
