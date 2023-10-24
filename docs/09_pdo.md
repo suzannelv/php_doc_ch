@@ -270,16 +270,95 @@ $stmt->bindValue(2, '%' . $_GET['username'] . '%', PDO::PARAM_STR);
 // 2 - 執行查詢
 $stmt->execute();
 ```
+
 注意，在使用佔位符（即問號，也就是匿名參數）的情況下，我們指定參數的**位置**而不是名稱。
 
 如果使用命名參數，我們可以使用參數的名稱而不是位置。
 
 :::note 注意
 
-還有另一種 ``PDOStatement`` 的方法叫做 ``bindParam`` 。
+還有另一種 `PDOStatement` 的方法叫做 `bindParam` 。
 
-它的行為有所不同，因為它**將PHP變量綁定到查詢參數**。 在這種情況下，PHP變量與查詢參數透過引用綁定在一起，甚至可以被修改。
+它的行為有所不同，因為它**將 PHP 變量綁定到查詢參數**。 在這種情況下，PHP 變量與查詢參數透過引用綁定在一起，甚至可以被修改。
 
-因此，在使用這個方法時要小心潛在的副作用。 通常情況下，為了避免過度耦合程式碼和查詢，我們會更常使用 ``bindValue`` 方法。
+因此，在使用這個方法時要小心潛在的副作用。 通常情況下，為了避免過度耦合程式碼和查詢，我們會更常使用 `bindValue` 方法。
 
+:::
+
+## 外部化配置
+
+我們的程式碼（代碼）成功連接到資料庫，可以執行查詢、插入記錄等等...
+
+但是連接憑證儲存在程式碼中。
+
+-   第一個問題是，當我們將專案發佈到 Github 時，連接憑證會以明文形式儲存在程式碼中，任何查看檔案的人都可以看到它們。
+-   第二個問題是，如果我想克隆項目，甚至是派生(fork)項目以參與開發並發起拉取請求，那麼要么我**必須**擁有與數據庫相同的連接配置，也就是說我必須修改包含憑證的文件，這將導致 Git 將該檔案標記為已修改。 因此，需要小心不要將其包含在提交中！
+
+為了解決這兩個問題，我們將連接參數外部化到一個設定檔中。
+
+然後，從 PHP 程式碼中，我們將載入這個設定檔的內容，並使用載入的值建立 PDO 實例。
+
+### INI 文件
+
+在 PHP 配置中，我們已經看到了 `ini` 檔案是如何運作的。
+
+因此，我們可以以 `ini` 格式建立自己的設定(配置)文件，然後使用 `parse_ini_file` 函數將其內容載入到 PHP 陣列中。
+
+> config/db.ini
+
+```ini
+; Mettre les valeurs réelles ci-dessous
+dbname=xxxxx
+host=xxxxx
+port=xxxx
+charset=utf8mb4
+user=xxxx
+password=xxxx
+```
+
+> index.php
+
+我們使用數組重構來直接分配變量：
+
+```bash
+[
+  'dbname' => $dbname,
+  'host' => $host,
+  'port' => $port,
+  'charset' => $charset,
+  'user' => $user,
+  'password' => $password
+] = parse_ini_file(__DIR__ . "/config/db.ini");
+
+$dsn = "mysql:dbname=$dbname;host=$host;port=$port;charset=$charset";
+
+$options = [
+  PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+  PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+];
+
+try {
+  $pdo = new PDO($dsn, $user, $password, $options);
+} catch (PDOException $e) {
+  echo $e->getMessage();
+  exit;
+}
+```
+
+因此，連接參數是在程式碼之外載入的。
+
+### 從版本控制中移除 INI 文件
+
+之後的問題是，"我們如何將參數排除版本控制？" 因為現在看來，我們似乎只是把問題轉移了！
+
+為此，有不同的解決方案：
+
+-   可以將 `db.ini` 檔案新增至 `.gitignore` 檔案中，這樣它就不在版本控制範圍內。但如果沒有該文件，為了避免其他開發人員在查看程式碼時確定需要建立該文件，可以在專案根目錄下的 `README.md` 文件中新增說明。
+
+-   可以將 `db.ini` 檔案新增至 `.gitignore` 檔案中，並建立第二個文件，例如 `db.ini.template` ，其中只包含像 "xxxxx" 這樣的佔位符。 因此，這個檔案保持不變，因為唯一需要做的就是將其內容複製到 db.ini 檔案中。
+
+-   可以將前兩種方法結合起來，提供一個模板並提供說明。
+
+:::caution
+無論哪種情況，都必須將 `db.ini` 檔案排除在版本控制之外（對於所有提到的方法都是如此）。
 :::
