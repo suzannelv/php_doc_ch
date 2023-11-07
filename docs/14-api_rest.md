@@ -128,7 +128,7 @@ HTTP/1.1 201 Created
 { "uri": "/api/emails/65" }
 ```
 
-**HATEOAS（Hypermedia As The Engine Of Application State - 超媒體作為應用狀態的引擎）**
+**HATEOAS（Hypermedia As The Engine Of Application State - 超媒體作為應用程式狀態引擎）**
 
 除了所提供的回應之外，伺服器還可以傳回其他訊息，使客戶端能夠繼續與應用程式介面進行互動。
 
@@ -203,7 +203,7 @@ HTTP/1.1 200 OK
 
 :::
 
-### 多層系統（可選）
+### 分層系統（可選）
 
 從客戶端的角度來看，我們會請求一個包含 API 的伺服器。 實際上，該伺服器可能位於其他具有相同角色的伺服器中，其設定是為了在活動頻繁時分配負載（負載平衡）。
 
