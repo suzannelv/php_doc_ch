@@ -38,10 +38,10 @@ Api-Key: OklDeJjErBKNMCRaiLDPuIB3Ca
 
 ```mermaid
 sequenceDiagram
-Client->>API: Requête avec Token
-alt valid token
-API->>Client: Réponse 2xx OK
-else invalid token
-API->>Client: Réponse 4xx Erreur
+Client->>API: 令牌請求
+alt 有效令牌
+API->>Client: 響應 2xx OK
+else 無效令牌
+API->>Client: 回覆 4xx 錯誤
 end
 ```
