@@ -63,12 +63,11 @@ var_dump(json_decode($response, true));
 
 為了避免處理繁瑣的 cURL 的所有選項，我們可以使用專門用於發出請求的軟體包。
 
-因此，我們擁有一個現成的物件接口，比預設的 cURL 庫更加舒適。
+因此，我們擁有一個現成的物件接口，比預設的 cURL 庫更加方便。
 
-文件寫得非常出色 🤓，例如下面類型的範例：
+[文檔](https://symfony.com/doc/current/http_client.html)寫得非常出色 🤓，例如下面的範例：
 
 ```php
-
 use Symfony\Component\HttpClient\HttpClient;
 
 $client = HttpClient::create();
